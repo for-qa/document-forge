@@ -6,6 +6,19 @@ const statusMsg = document.getElementById('statusMsg');
 const sourceRadios = document.getElementsByName('sourceType');
 const urlInputContainer = document.getElementById('urlInputContainer');
 const fileInputContainer = document.getElementById('fileInputContainer');
+const fileUpload = document.getElementById('fileUpload');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+// Update filename display dynamically when a local file is chosen
+fileUpload.addEventListener('change', function() {
+    if (this.files && this.files.length > 0) {
+        fileNameDisplay.textContent = this.files[0].name;
+        fileNameDisplay.style.color = 'var(--text-main)';
+    } else {
+        fileNameDisplay.textContent = 'No file chosen';
+        fileNameDisplay.style.color = 'var(--text-muted)';
+    }
+});
 
 // Toggle visually between URL string input or File upload
 sourceRadios.forEach(radio => {
