@@ -1,18 +1,34 @@
 const { chromium } = require('playwright');
+const path = require('path');
+
+// Get filename from arguments or default to 'index.html'
+const filename = process.argv[2] || 'index.html';
+const outputFilename = process.argv[3] || (filename.replace(/\.[^/.]+$/, "") + ".pdf");
 
 (async () => {
     console.log('Launching browser to render high-quality PDF...');
     const browser = await chromium.launch();
     const page = await browser.newPage();
     
-    const fileUrl = 'file:///d:/Portfolio/gairik/GAIRIK_SINGHA_RESUME.html';
+    // Resolve paths to the local assets and output directories
+    const inputPath = path.resolve(__dirname, 'assets', filename);
+    const outputPath = path.resolve(__dirname, 'output', outputFilename);
+    // Properly format the file URL for Windows/Unix paths
+    const fileUrl = 'file:///' + inputPath.replace(/\\/g, '/');
+
     console.log(`Navigating to ${fileUrl}`);
-    await page.goto(fileUrl, { waitUntil: 'load' });
     
+    try {
+        await page.goto(fileUrl, { waitUntil: 'load' });
+    } catch (e) {
+        console.error(`\n[ERROR] Failed to load ${fileUrl}.`);
+        console.error(`Please ensure that "${filename}" exists inside the "assets" folder.\n`);
+        throw e;
+    }
+    
+    // Wait for fonts and network resources to stabilize
     await page.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(3000);
-    
-    const outputPath = 'd:/Portfolio/gairik/Gairik_Singha_SDET_Resume.pdf';
+    await page.waitForTimeout(3000); 
     
     await page.pdf({
         path: outputPath,

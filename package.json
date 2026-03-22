@@ -1,5 +1,5 @@
 {
-  "name": "capture-generate-pdf",
+  "name": "document-forge",
   "version": "1.0.0",
   "description": "",
   "main": "capture.js",
