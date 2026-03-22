@@ -1,61 +1,75 @@
 # Document Forge
 
-This tool uses [Playwright](https://playwright.dev/) to render local HTML files via a headless Chromium browser, allowing you to easily generate high-quality PDF files and capture screenshots (images) from your HTML projects.
+**Document Forge** is a robust Command-Line Interface (CLI) tool that uses [Playwright](https://playwright.dev/) and a headless Chromium browser to render local HTML files or remote URLs and easily capture high-quality A4 PDFs or images.
 
 ## Project Structure
 
-* **`assets/`**: Place all of your local input files here (e.g., HTML, CSS, images, fonts). This is where the scripts will look for the source files by default.
-* **`output/`**: Any generated `.pdf` or `.png` files will be automatically exported and saved into this folder.
-* **`generate_pdf.js`**: Script designed to render a target HTML file as an A4 PDF document.
-* **`capture.js`**: Script designed to capture a high-resolution screenshot (image) from a target HTML file.
+* **`assets/`**: Place all of your local input files here (e.g., HTML, CSS, images, fonts). This is where the tool will look for local filenames by default.
+* **`output/`**: Any generated files (.pdf, .png) will be automatically created and exported into this folder.
+* **`index.js`**: The single, unified entry-point command line script for the tool.
 
 ## Prerequisites
 
-Make sure you've installed the necessary Node.js dependencies:
+If you have just cloned the repository, be sure to install all the required Node.js dependencies:
 
 ```bash
 npm install
 ```
 
-## How to use
+---
 
-### 1. Generating a PDF
+## 🚀 How To Use Document Forge
 
-1. Place your target HTML file (along with any styling/assets) into the `assets/` folder. For this example, let's assume your file is called `resume.html`.
-2. Open your terminal in this project's root folder.
-3. Run the following command, specifying the filename:
+With the newly updated robust CLI interface, you can generate PDFs or images, pass directly live website URLs, and apply dark mode using terminal flags!
 
+### The `pdf` Command: Generating PDF documents
+Generate crisp, borderless, A4 PDF files. You can pass in a local filename (from your `assets/` folder) OR a live http/https URL.
+
+**Usage:**
 ```bash
-node generate_pdf.js resume.html
+node index.js pdf <input> [output_filename] [options]
 ```
 
-*Note: The script outputs an A4 formatted PDF. It will be saved as `output/resume.pdf`.*
-
-**Optional - Custom Output Name**:
-You can specify the name of the output PDF explicitly:
-
+**Examples:**
 ```bash
-node generate_pdf.js resume.html custom_output_name.pdf
+# Renders 'assets/resume.html' and exports to 'output/resume.pdf'
+node index.js pdf resume.html
+
+# Renders a remote URL and saves it custom named to 'output/my_github.pdf'
+node index.js pdf https://github.com/for-qa my_github.pdf
+
+# Renders the HTML file with Dark Mode enabled 🌙
+node index.js pdf resume.html --dark
 ```
 
-### 2. Capturing an Image (Screenshot)
+### The `image` Command: Capturing Screenshots
+Captures high-resolution PNG snapshots of a document or webpage. By default, it captures a 2800x700 viewport, but this can be customized perfectly for your needs!
 
-1. Place your target HTML file into the `assets/` folder. For this example, let's assume it's `banner.html`.
-2. Run the capture command:
-
+**Usage:**
 ```bash
-node capture.js banner.html
+node index.js image <input> [output_filename] [options]
 ```
 
-*Note: By default, `capture.js` uses a viewport dimension of `2800x700` (which is useful for banners, etc.). You can modify the `viewport` size on line 11 of `capture.js` if you want a different sizing.*
+**Options:**
+- `-d, --dark`: Emulate dark mode CSS scheme. 🌙
+- `-w, --width <pixels>`: The viewport width (Default: 2800)
+- `-h, --height <pixels>`: The viewport height (Default: 700)
 
-**Optional - Custom Output Name**:
-Like the PDF generator, you can set the exact output name:
-
+**Examples:**
 ```bash
-node capture.js banner.html my_custom_banner.png
+# Capture a simple image from a local html file
+node index.js image banner.html
+
+# Capture an image from a live website with a custom 1920x1080 viewport size! 
+node index.js image https://google.com my_google_snap.png --width 1920 --height 1080
+
+# Capture a local file enforcing dark mode CSS themes
+node index.js image banner.html --dark
 ```
 
-## Tips
-* The scripts have built-in delays (`await page.waitForTimeout(...)`) and await `document.fonts.ready` to ensure that custom web fonts and animations have fully loaded before the PDF or render is generated. If your page takes longer to load complex styles, consider increasing the timeout!
-* Use relative paths for images/stylesheets inside your HTML so it resolves perfectly inside the `assets/` folder (e.g., `<link rel="stylesheet" href="./style.css">`).
+---
+
+### Tips
+* Using `<link rel="stylesheet" href="./style.css">` inside your HTML will natively resolve perfectly if it is inside the `assets/` folder.
+* The Playwright engine has built-in waits specifically looking for `document.fonts.ready` to ensure your web fonts and icon-fonts load perfectly every time!
+* All progress updates will cleanly spin via `ora` in your terminal to easily let you know when the resource tracking is done!
