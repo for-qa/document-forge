@@ -29,8 +29,25 @@
         <section class="glass-panel">
             <form id="generate-form">
                 <div class="input-group full-width">
-                    <label for="urlInput">Target URL or Local Filename</label>
-                    <input type="text" id="urlInput" placeholder="https://example.com OR resume.html" required autocomplete="off">
+                    <label>Data Source</label>
+                    <div class="source-toggle">
+                        <label class="radio-label">
+                            <input type="radio" name="sourceType" value="url" checked> Live URL
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="sourceType" value="file"> Upload HTML File
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group full-width" id="urlInputContainer">
+                    <label for="urlInput">Target Web URL</label>
+                    <input type="text" id="urlInput" placeholder="https://example.com" autocomplete="off">
+                </div>
+
+                <div class="input-group full-width" id="fileInputContainer" style="display: none;">
+                    <label for="fileUpload">Upload Local File (.html)</label>
+                    <input type="file" id="fileUpload" accept=".html,.htm" class="file-input">
                 </div>
 
                 <div class="input-row">

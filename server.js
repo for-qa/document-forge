@@ -2,36 +2,48 @@ const express = require('express');
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Setup multer mapping for uploaded files
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+const upload = multer({ dest: uploadDir });
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper to determine target URL
-function resolveTargetUrl(input) {
-  if (input.startsWith('http://') || input.startsWith('https://')) {
-    return input;
-  }
-  // Assume local file in assets folder
-  const inputPath = path.resolve(__dirname, 'assets', input);
-  if (!fs.existsSync(inputPath)) {
-    throw new Error(`Could not find "${input}" inside the assets folder.`);
-  }
-  return 'file:///' + inputPath.replace(/\\/g, '/');
-}
-
-app.post('/api/generate', async (req, res) => {
+app.post('/api/generate', upload.single('htmlFile'), async (req, res) => {
   const { type, url, darkMode, width, height } = req.body;
-  if (!url) return res.status(400).json({ error: 'URL or filename is required.' });
+  const file = req.file;
+
+  if (!url && !file) {
+    return res.status(400).json({ error: 'Please provide either a Live URL or upload an HTML file.' });
+  }
 
   let browser;
+  let targetUrl;
+
   try {
-    const targetUrl = resolveTargetUrl(url);
+    if (file) {
+      // Local file uploaded directly from browser
+      targetUrl = 'file:///' + path.resolve(file.path).replace(/\\/g, '/');
+    } else {
+      // Live URL provided via Input text
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          targetUrl = 'https://' + url;
+      } else {
+          targetUrl = url;
+      }
+    }
+
     browser = await chromium.launch();
     
-    // For pdf defaults
+    // Default PDF Viewport dimensions
     let viewport = { width: 1920, height: 1080 };
     if (type === 'image') {
       viewport.width = parseInt(width, 10) || 2800;
@@ -40,18 +52,21 @@ app.post('/api/generate', async (req, res) => {
 
     const page = await browser.newPage({ viewport });
 
-    if (darkMode) {
+    if (darkMode === 'true') {
       await page.emulateMedia({ colorScheme: 'dark' });
     }
 
     await page.goto(targetUrl, { waitUntil: 'load' });
     
-    // Wait for fonts and network resources to stabilize
+    // Safety check waiting for fonts to resolve before render
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(2000); 
 
     let buffer;
-    let filename = url.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/\.[^/.]+$/, "");
+    let baseFilename = file ? file.originalname.replace(/\.[^/.]+$/, "") : url.replace(/[^a-zA-Z0-9.-]/g, '_');
+    if (!baseFilename) baseFilename = 'document';
+    
+    let filename = baseFilename;
     let contentType;
 
     if (type === 'pdf') {
@@ -77,6 +92,10 @@ app.post('/api/generate', async (req, res) => {
     res.status(500).json({ error: error.message || 'Failed to generate file.' });
   } finally {
     if (browser) await browser.close();
+    // Intelligently clean up the uploaded temporary file after use to conserve space
+    if (file && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+    }
   }
 });
 

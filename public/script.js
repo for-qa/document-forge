@@ -3,6 +3,22 @@ const typeSelect = document.getElementById('typeSelect');
 const viewportSettings = document.getElementById('viewportSettings');
 const submitBtn = document.getElementById('submitBtn');
 const statusMsg = document.getElementById('statusMsg');
+const sourceRadios = document.getElementsByName('sourceType');
+const urlInputContainer = document.getElementById('urlInputContainer');
+const fileInputContainer = document.getElementById('fileInputContainer');
+
+// Toggle visually between URL string input or File upload
+sourceRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        if (e.target.value === 'url') {
+            urlInputContainer.style.display = 'flex';
+            fileInputContainer.style.display = 'none';
+        } else {
+            urlInputContainer.style.display = 'none';
+            fileInputContainer.style.display = 'flex';
+        }
+    });
+});
 
 // Show/Hide viewport settings based on type
 typeSelect.addEventListener('change', (e) => {
@@ -24,19 +40,47 @@ form.addEventListener('submit', async (e) => {
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
 
-    const payload = {
-        url: document.getElementById('urlInput').value,
-        type: typeSelect.value,
-        darkMode: document.getElementById('darkModeToggle').checked,
-        width: document.getElementById('widthInput').value,
-        height: document.getElementById('heightInput').value
-    };
+    const sourceType = document.querySelector('input[name="sourceType"]:checked').value;
+    const urlInput = document.getElementById('urlInput').value;
+    const fileUpload = document.getElementById('fileUpload').files[0];
+    const type = typeSelect.value;
+    const darkMode = document.getElementById('darkModeToggle').checked;
+    const width = document.getElementById('widthInput').value;
+    const height = document.getElementById('heightInput').value;
+
+    if (sourceType === 'url' && !urlInput) {
+        statusMsg.textContent = 'Please enter a valid URL.';
+        statusMsg.classList.add('status-msg', 'error', 'show');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        return;
+    }
+
+    if (sourceType === 'file' && !fileUpload) {
+        statusMsg.textContent = 'Please upload an HTML file.';
+        statusMsg.classList.add('status-msg', 'error', 'show');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        return;
+    }
+
+    // Convert everything to a multipart FormData object to support strict file payloads
+    const formData = new FormData();
+    formData.append('type', type);
+    formData.append('darkMode', darkMode);
+    formData.append('width', width);
+    formData.append('height', height);
+
+    if (sourceType === 'url') {
+        formData.append('url', urlInput);
+    } else {
+        formData.append('htmlFile', fileUpload);
+    }
 
     try {
         const response = await fetch('/api/generate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: formData
         });
 
         if (!response.ok) {
@@ -50,7 +94,7 @@ form.addEventListener('submit', async (e) => {
         const a = document.createElement('a');
         
         const disposition = response.headers.get('content-disposition');
-        let filename = payload.type === 'pdf' ? 'document.pdf' : 'capture.png';
+        let filename = type === 'pdf' ? 'document.pdf' : 'capture.png';
         if (disposition && disposition.indexOf('filename=') !== -1) {
             const matches = /filename="([^"]+)"/.exec(disposition);
             if (matches != null && matches[1]) { 
