@@ -21,6 +21,11 @@ class GenerateController {
 
       if (file) {
         // Local file attached via Multer
+        // Rename the temporary file to have a .html extension so Chrome renders it as a Webpage rather than pure text
+        const newPath = file.path + '.html';
+        fs.renameSync(file.path, newPath);
+        file.path = newPath;
+        
         targetUrl = 'file:///' + path.resolve(file.path).replace(/\\/g, '/');
         baseFilename = file.originalname.replace(/\.[^/.]+$/, "");
       } else {
