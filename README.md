@@ -1,14 +1,16 @@
 # Document Forge
 
-**Document Forge** is a robust Command-Line Interface (CLI) tool that uses [Playwright](https://playwright.dev/) and a headless Chromium browser to render local HTML files or remote URLs and easily capture high-quality A4 PDFs or images.
+**Document Forge** is a modern, open-source Web Application and REST API powered by Node.js, Express, and [Playwright](https://playwright.dev/). It seamlessly converts local HTML files or live remote URLs into high-quality A4 PDFs or high-fidelity PNG images without requiring any command-line tools.
 
-## Project Structure
+## 🌟 Key Features
 
-* **`assets/`**: Place all of your local input files here (e.g., HTML, CSS, images, fonts). This is where the tool will look for local filenames by default.
-* **`output/`**: Any generated files (.pdf, .png) will be automatically created and exported into this folder.
-* **`index.js`**: The single, unified entry-point command line script for the tool.
+* 🌐 **Modern Web UI**: A beautiful, responsive web interface allowing anyone to easily upload HTML files or paste live URLs to generate documents instantly.
+* 🔌 **Express REST API**: A fully functional API endpoint (`/api/generate`) securely handling multipart form-data (file uploads) and JSON payloads for programmatic access.
+* 🌙 **Dark Mode Emulation**: Built-in toggle to force the headless browser to capture webpages utilizing their respective dark themes.
+* 📏 **Custom Viewports**: Export custom high-fidelity PNGs at an exact viewport dimension (e.g., 1920x1080 or custom presets).
+* ⚡ **Playwright Engine**: Utilizes the robust Playwright browser automation framework behind the scenes for pixel-perfect Chromium rendering and native wait-for-fonts loading.
 
-## Prerequisites
+## 🚀 Getting Started
 
 If you have just cloned the repository, be sure to install all the required Node.js dependencies:
 
@@ -16,60 +18,35 @@ If you have just cloned the repository, be sure to install all the required Node
 npm install
 ```
 
----
+### Starting the Web Server
 
-## 🚀 How To Use Document Forge
+Document Forge runs as a local Express server:
 
-With the newly updated robust CLI interface, you can generate PDFs or images, pass directly live website URLs, and apply dark mode using terminal flags!
-
-### The `pdf` Command: Generating PDF documents
-Generate crisp, borderless, A4 PDF files. You can pass in a local filename (from your `assets/` folder) OR a live http/https URL.
-
-**Usage:**
 ```bash
-node index.js pdf <input> [output_filename] [options]
+npm start
 ```
+By default, the application will spin up at **`http://localhost:3000`**.
 
-**Examples:**
-```bash
-# Renders 'assets/resume.html' and exports to 'output/resume.pdf'
-node index.js pdf resume.html
+### Using the Web UI
+Simply open your browser and navigate to `http://localhost:3000`. 
 
-# Renders a remote URL and saves it custom named to 'output/my_github.pdf'
-node index.js pdf https://github.com/for-qa my_github.pdf
+1. **Data Source:** Toggle between entering a live website URL or securely browsing for a local `.html` file on your computer.
+2. **Output Format:** Choose whether you want a crisp A4 PDF or a custom Image snapshot (PNG).
+3. **Advanced Settings:** Enable Dark Mode capturing or precisely manually adjust viewport bounds before rendering your capture!
 
-# Renders the HTML file with Dark Mode enabled 🌙
-node index.js pdf resume.html --dark
-```
+### Using the REST API
+If you're integrating Document Forge into another service or backend system, you can easily interface with the programmatic REST architecture.
 
-### The `image` Command: Capturing Screenshots
-Captures high-resolution PNG snapshots of a document or webpage. By default, it captures a 2800x700 viewport, but this can be customized perfectly for your needs!
-
-**Usage:**
-```bash
-node index.js image <input> [output_filename] [options]
-```
-
-**Options:**
-- `-d, --dark`: Emulate dark mode CSS scheme. 🌙
-- `-w, --width <pixels>`: The viewport width (Default: 2800)
-- `-h, --height <pixels>`: The viewport height (Default: 700)
-
-**Examples:**
-```bash
-# Capture a simple image from a local html file
-node index.js image banner.html
-
-# Capture an image from a live website with a custom 1920x1080 viewport size! 
-node index.js image https://google.com my_google_snap.png --width 1920 --height 1080
-
-# Capture a local file enforcing dark mode CSS themes
-node index.js image banner.html --dark
-```
+**Endpoint:** `POST /api/generate`  
+_Accepts `multipart/form-data` with the following variables:_
+- `url` (String): The target website HTTP link (optional if uploading a file).
+- `htmlFile` (File): Local `.html` file upload (optional if passing url).
+- `type` (String): `pdf` or `image` (Selects the generation format).
+- `darkMode` (String): `"true"` (Forces the CSS dark theme engine).
+- `width` / `height` (Numeric String): Controls the screenshot viewport framing size.
 
 ---
 
-### Tips
-* Using `<link rel="stylesheet" href="./style.css">` inside your HTML will natively resolve perfectly if it is inside the `assets/` folder.
-* The Playwright engine has built-in waits specifically looking for `document.fonts.ready` to ensure your web fonts and icon-fonts load perfectly every time!
-* All progress updates will cleanly spin via `ora` in your terminal to easily let you know when the resource tracking is done!
+## 📄 License
+
+This project is licensed under the [ISC License](LICENSE).
