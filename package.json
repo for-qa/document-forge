@@ -8,8 +8,8 @@
     "start": "node src/server.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "for-qa",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "express": "^5.2.1",
