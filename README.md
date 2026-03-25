@@ -10,6 +10,13 @@
 * 📏 **Custom Viewports**: Export custom high-fidelity PNGs at an exact viewport dimension (e.g., 1920x1080 or custom presets).
 * ⚡ **Playwright Engine**: Utilizes the robust Playwright browser automation framework behind the scenes for pixel-perfect Chromium rendering and native wait-for-fonts loading.
 
+## 🛠️ Tech Stack
+
+This project is built using a lightweight, performant stack:
+- **Backend**: Node.js with Express.js
+- **Browser Automation**: Playwright (Headless Chromium)
+- **File Parsing**: Multer (Multipart form-data)
+
 ## 🚀 Getting Started
 
 If you have just cloned the repository, be sure to install all the required Node.js dependencies:
@@ -25,10 +32,10 @@ Document Forge runs as a local Express server:
 ```bash
 npm start
 ```
-By default, the application will spin up at **`http://localhost:3000`**.
+By default, the application will spin up at **`http://localhost:8101`**.
 
 ### Using the Web UI
-Simply open your browser and navigate to `http://localhost:3000`. 
+Simply open your browser and navigate to `http://localhost:8101`. 
 
 1. **Data Source:** Toggle between entering a live website URL or securely browsing for a local `.html` file on your computer.
 2. **Output Format:** Choose whether you want a crisp A4 PDF or a custom Image snapshot (PNG).
